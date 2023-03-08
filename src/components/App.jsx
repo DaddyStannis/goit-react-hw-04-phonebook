@@ -2,22 +2,8 @@ import Section from './shared/components/Section/Section';
 import ContactForm from './modules/ContactForm/ContactForm';
 import ContactList from './modules/ContactList/ContactList';
 import { nanoid } from 'nanoid';
-
+import { useLocalStorage } from './shared/hooks/hooks';
 import { useState, useCallback, useMemo } from 'react';
-
-function useLocalStorage(key, value) {
-  const storageData = localStorage.getItem(key);
-  const defaultValue = storageData ? JSON.parse(storageData) : value;
-  const [state, setState] = useState(defaultValue);
-
-  const writeData = val => {
-    const data = typeof val === 'function' ? val() : val;
-    localStorage.setItem(key, JSON.stringify(data));
-    setState(val);
-  };
-
-  return [state, writeData];
-}
 
 function isDublicate(name, contacts) {
   const normalizedName = name.toLowerCase();
