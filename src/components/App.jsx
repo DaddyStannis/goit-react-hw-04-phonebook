@@ -2,11 +2,8 @@ import Section from './shared/components/Section/Section';
 import ContactForm from './modules/ContactForm/ContactForm';
 import ContactList from './modules/ContactList/ContactList';
 import { nanoid } from 'nanoid';
-import { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getFilter, getContacts } from './shared/redux/selectors';
-import { addContact, deleteContact } from './shared/redux/contactsSlice';
-import { setFilter } from './shared/redux/filterSlice';
+import { useLocalStorage } from './shared/hooks/hooks';
+import { useState, useCallback, useMemo } from 'react';
 
 function isDublicate(name, contacts) {
   const normalizedName = name.toLowerCase();
@@ -19,9 +16,8 @@ function isDublicate(name, contacts) {
 }
 
 const App = () => {
-  const dispatch = useDispatch();
-  const contacts = useSelector(getContacts);
-  const filter = useSelector(getFilter);
+  const [contacts, setContacts] = useLocalStorage('contacts', []);
+  const [filter, setFilter] = useState('');
 
   const getFilteredContacts = useCallback(() => {
     if (!filter.length) {
@@ -37,21 +33,31 @@ const App = () => {
         alert('This contact already exist');
         return;
       }
-      dispatch(addContact({ id: nanoid(), name, number }));
+
+      const newContact = {
+        id: nanoid(),
+        name: name,
+        number: number,
+      };
+
+      setContacts(() => [...contacts, newContact]);
     },
     [contacts]
   );
 
   const handleDelete = useCallback(
     id => {
-      dispatch(deleteContact(id));
+      const filteredContacts = contacts.filter(
+        ({ id: idFromArray }) => idFromArray !== id
+      );
+      setContacts(filteredContacts);
     },
     [contacts]
   );
 
   const handleFilter = useCallback(
     str => {
-      dispatch(setFilter(str.toLowerCase()));
+      setFilter(str.toLowerCase());
     },
     [filter]
   );
